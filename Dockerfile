@@ -1,11 +1,13 @@
 FROM node:20-alpine AS base
 
-# Install poppler for pdf2pic (PDF → images conversion)
+# Install poppler (pdftoppm) for PDF → images conversion
 RUN apk add --no-cache poppler-utils
 
 WORKDIR /app
 
 FROM base AS deps
+# Install build tools required for better-sqlite3 native module
+RUN apk add --no-cache python3 make g++
 COPY package.json package-lock.json ./
 RUN npm ci --legacy-peer-deps
 
