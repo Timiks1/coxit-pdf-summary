@@ -1,36 +1,94 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PDF Summary AI
 
-## Getting Started
+Upload PDF documents (up to 50MB, 100 pages) and receive AI-generated summaries using GPT-5.1 Vision. Supports PDFs with images, tables, and scanned content.
 
-First, run the development server:
+## How It Works
+
+1. PDF pages are converted to images via `pdf2pic`
+2. Pages are grouped into chunks of 10
+3. All chunks are summarized in **parallel** using GPT-5.1 Vision (map phase)
+4. Chunk summaries are merged into a single cohesive summary (reduce phase)
+5. Result is saved to SQLite and displayed in the UI
+
+## Setup
+
+### Prerequisites
+
+- Node.js 20+
+- [poppler](https://poppler.freedesktop.org/) (for PDF→image conversion)
+  - macOS: `brew install poppler`
+  - Ubuntu: `apt-get install poppler-utils`
+- OpenAI API key
+
+### Local Development
 
 ```bash
+# 1. Install dependencies
+npm install --legacy-peer-deps
+
+# 2. Configure environment
+cp .env.example .env.local
+# Add your OPENAI_API_KEY to .env.local
+
+# 3. Run
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Docker
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+# Copy and fill env file
+cp .env.example .env
+# edit .env and set OPENAI_API_KEY
 
-## Learn More
+# Build and run
+docker compose up --build
+```
 
-To learn more about Next.js, take a look at the following resources:
+The app runs on [http://localhost:3000](http://localhost:3000).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Data persists across restarts in Docker volumes (`pdf_data` for SQLite, `pdf_uploads` for temp files).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## API
 
-## Deploy on Vercel
+### `POST /api/upload`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Upload a PDF and receive a summary.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**Request:** `multipart/form-data`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `file` | File | PDF file, max 50MB |
+
+**Response:**
+```json
+{
+  "summary": "The document covers...",
+  "file_name": "report.pdf",
+  "page_count": 42
+}
+```
+
+---
+
+### `GET /api/history`
+
+Returns the last 5 processed documents.
+
+**Response:**
+```json
+{
+  "documents": [
+    {
+      "id": 1,
+      "file_name": "report.pdf",
+      "summary": "The document covers...",
+      "page_count": 42,
+      "created_at": "2026-02-18 10:30:00"
+    }
+  ]
+}
+```

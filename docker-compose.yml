@@ -1,0 +1,15 @@
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    volumes:
+      - pdf_data:/app/data
+      - pdf_uploads:/app/uploads
+    restart: unless-stopped
+
+volumes:
+  pdf_data:
+  pdf_uploads:
