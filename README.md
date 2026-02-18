@@ -4,8 +4,8 @@ Upload PDF documents (up to 50MB, 100 pages) and receive AI-generated summaries 
 
 ## How It Works
 
-1. PDF pages are converted to images via `pdf2pic`
-2. Pages are grouped into chunks of 10
+1. PDF pages are converted to images via `pdftoppm`
+2. Pages are grouped into chunks of 20
 3. All chunks are summarized in **parallel** using GPT-5.1 Vision (map phase)
 4. Chunk summaries are merged into a single cohesive summary (reduce phase)
 5. Result is saved to SQLite and displayed in the UI
