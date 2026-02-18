@@ -1,6 +1,6 @@
 import type { State } from '../state'
 
-const PAGES_PER_CHUNK = 10
+const PAGES_PER_CHUNK = 35
 
 export const chunkPages = (state: State): Partial<State> => {
   const { pages } = state
