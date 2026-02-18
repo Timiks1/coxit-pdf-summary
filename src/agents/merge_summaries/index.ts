@@ -1,11 +1,9 @@
-import OpenAI from 'openai'
 import type { State } from '../../state'
+import { openai, getContent } from '../../lib/openai'
 import { SYSTEM_PROMPT } from './prompt'
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
-
 const MODEL = 'gpt-5.1'
-const TEMPERATURE = 0.3
+const TEMPERATURE = 0
 
 export const mergeSummaries = async (state: State): Promise<Partial<State>> => {
   const { chunk_summaries, file_name } = state
@@ -28,7 +26,7 @@ export const mergeSummaries = async (state: State): Promise<Partial<State>> => {
     ],
   })
 
-  const final_summary = response.choices[0]?.message?.content ?? ''
+  const final_summary = getContent(response)
 
   return { final_summary }
 }

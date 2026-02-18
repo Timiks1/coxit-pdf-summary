@@ -5,17 +5,10 @@ const PAGES_PER_CHUNK = 10
 export const chunkPages = (state: State): Partial<State> => {
   const { pages } = state
 
-  const chunks: typeof pages[] = []
-
-  pages.forEach((page, index) => {
-    const chunk_index = Math.floor(index / PAGES_PER_CHUNK)
-
-    if (!chunks[chunk_index]) {
-      chunks[chunk_index] = []
-    }
-
-    chunks[chunk_index].push(page)
-  })
+  const chunks = Array.from(
+    { length: Math.ceil(pages.length / PAGES_PER_CHUNK) },
+    (_, i) => pages.slice(i * PAGES_PER_CHUNK, (i + 1) * PAGES_PER_CHUNK)
+  )
 
   return { chunks }
 }

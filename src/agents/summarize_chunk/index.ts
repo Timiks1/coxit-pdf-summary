@@ -1,16 +1,13 @@
-import OpenAI from 'openai'
 import type { State, ChunkSummary } from '../../state'
+import { openai, getContent } from '../../lib/openai'
 import { SYSTEM_PROMPT } from './prompt'
-
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
 const MODEL = 'gpt-5.1'
 const TEMPERATURE = 0
 
 export const summarizeChunk = async (state: State): Promise<Partial<State>> => {
-  const { item, item_index } = state
-
-  const pages = item ?? []
+  const pages = state.item!
+  const { item_index } = state
 
   const image_content = pages.map(page => ({
     type: 'image_url' as const,
@@ -38,7 +35,7 @@ export const summarizeChunk = async (state: State): Promise<Partial<State>> => {
     ],
   })
 
-  const summary = response.choices[0]?.message?.content ?? ''
+  const summary = getContent(response)
 
   const chunk_summary: ChunkSummary = {
     chunk_index: item_index,
